@@ -52,14 +52,13 @@
 
 // export default EarthCanvas;
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Canvas, useLoader } from "@react-three/fiber";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-// ⭐ STEP 1 — SANITIZE FUNCTION
+// ✅ SANITIZE FUNCTION (CORRECT)
 function sanitizeGeometry(geometry) {
-  if (!geometry || !geometry.attributes || !geometry.attributes.position)
-    return geometry;
+  if (!geometry?.attributes?.position) return;
 
   const pos = geometry.attributes.position.array;
   let fixed = false;
@@ -72,36 +71,39 @@ function sanitizeGeometry(geometry) {
   }
 
   if (fixed) {
-    console.warn("⚠ Geometry repaired!");
     geometry.attributes.position.needsUpdate = true;
     geometry.computeVertexNormals();
-    geometry.computeBoundingSphere();
     geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
+    console.warn("⚠ Geometry sanitized");
   }
-
-  return geometry;
 }
 
 const Earth = () => {
-  // ⭐ Load model
-const gltf = useLoader(GLTFLoader, "/planet/earth.gltf");
+  const gltf = useLoader(GLTFLoader, "/planet/earth.gltf");
 
-
-  // ⭐ STEP 2 — SANITIZE EACH MESH
-  gltf.scene.traverse((child) => {
-    if (child.isMesh && child.geometry) {
-      child.geometry = sanitizeGeometry(child.geometry);
-    }
-  });
+  // ✅ RUN ONCE ONLY
+  useEffect(() => {
+    gltf.scene.traverse((child) => {
+      if (child.isMesh && child.geometry) {
+        sanitizeGeometry(child.geometry);
+        child.frustumCulled = false;
+      }
+    });
+  }, [gltf]);
 
   return <primitive object={gltf.scene} scale={2.5} />;
 };
 
 const EarthCanvas = () => {
   return (
-    <Canvas>
-      <ambientLight intensity={1} />
-      <directionalLight position={[5, 5, 5]} />
+    <Canvas
+      frameloop="always"
+      camera={{ position: [0, 0, 5], fov: 45 }}
+      gl={{ preserveDrawingBuffer: true }}
+    >
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[5, 5, 5]} intensity={1} />
       <Earth />
     </Canvas>
   );

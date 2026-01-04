@@ -25,20 +25,19 @@ const ExperienceCard = ({ experience }) => {
       date={experience.date}
       iconStyle={{
         background: experience.iconBg,
-        
       }}
       icon={
         <div className="flex justify-center items-center w-full h-full">
-          {/* ✅ SAFE ICON SIZE (NO FULL COVER) */}
+          {/* ✅ SAFE ICON SIZE (circle break nahi hoga) */}
           <img
             src={experience.icon}
             alt={experience.company_name}
-            className="w-[75%] h-[75%] object-contain"
+            className="w-[65%] h-[65%] object-contain"
           />
         </div>
       }
     >
-      {/* 🔥 CARD */}
+      {/* 🔥 CARD BODY */}
       <div
         className="
           relative group
@@ -48,7 +47,7 @@ const ExperienceCard = ({ experience }) => {
           hover:shadow-purple-500/30
         "
       >
-        {/* 🔥 FLOATING TITLE (CARD KE BAHAR) */}
+        {/* 🔥 FLOATING TITLE (hover par upar bahar niklega) */}
         <div
           className="
             absolute -top-4 left-1/2
@@ -62,7 +61,7 @@ const ExperienceCard = ({ experience }) => {
             text-center
 
             opacity-0
-            transform translate-y-2
+            translate-y-2
             transition-all duration-300 ease-out
             group-hover:-translate-y-8
             group-hover:opacity-100
@@ -114,9 +113,12 @@ const ExperienceCard = ({ experience }) => {
 const Experience = () => {
   return (
     <>
-      {/* 🔥 SECTION HEADING (ALWAYS VISIBLE) */}
+      {/* ✅ FIXED HEADING (REFRESH SAFE) */}
       <motion.div
         variants={textVariant()}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
         className="relative z-30"
       >
         <p className={`${styles.sectionSubText} text-center`}>

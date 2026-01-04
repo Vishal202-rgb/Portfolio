@@ -10,9 +10,27 @@ const Earth = () => {
     if (!scene) return;
 
     scene.traverse((child) => {
-      if (child.isMesh) {
-        child.geometry.computeBoundingSphere();
-        child.geometry.computeBoundingBox();
+      if (child.isMesh && child.geometry) {
+        const geometry = child.geometry;
+
+        // ✅ FIX 1: Sanitize NaN vertices
+        const position = geometry.attributes.position;
+        if (position) {
+          for (let i = 0; i < position.array.length; i++) {
+            const v = position.array[i];
+            if (!Number.isFinite(v)) {
+              position.array[i] = 0;
+            }
+          }
+          position.needsUpdate = true;
+        }
+
+        // ✅ FIX 2: Recompute bounds AFTER sanitizing
+        geometry.computeBoundingBox();
+        geometry.computeBoundingSphere();
+
+        // ✅ FIX 3: Prevent frustum culling issues
+        child.frustumCulled = false;
       }
     });
   }, [scene]);
@@ -33,7 +51,7 @@ const EarthCanvas = () => {
   return (
     <Canvas
       shadows
-      frameloop="always"   // ✅ FIX 1
+      frameloop="always"
       dpr={[1, 2]}
       gl={{ preserveDrawingBuffer: true }}
       camera={{

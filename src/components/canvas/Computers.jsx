@@ -1,15 +1,50 @@
-import React, { Suspense, useEffect, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import React, { Suspense, useEffect, useState, useRef } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Preload, useGLTF } from "@react-three/drei";
 
 import CanvasLoader from "../Loader";
 
 const Computers = ({ isMobile }) => {
-  const computer = useGLTF("./desktop_pc/scene.gltf");
+  const { scene } = useGLTF("/desktop_pc/scene.gltf");
+  const modelRef = useRef();
+
+  // 🔄 ROTATION ANIMATION
+  useFrame((_, delta) => {
+    if (modelRef.current) {
+      modelRef.current.rotation.y += delta * 0.25; // speed control
+    }
+  });
+
+  useEffect(() => {
+    if (!scene) return;
+
+    scene.traverse((child) => {
+      if (child.isMesh && child.geometry) {
+        const geometry = child.geometry;
+
+        // ✅ Remove NaN / Infinity vertices
+        const position = geometry.attributes.position;
+        if (position) {
+          for (let i = 0; i < position.array.length; i++) {
+            if (!Number.isFinite(position.array[i])) {
+              position.array[i] = 0;
+            }
+          }
+          position.needsUpdate = true;
+        }
+
+        // ✅ Safe bounds
+        geometry.computeBoundingBox();
+        geometry.computeBoundingSphere();
+
+        child.frustumCulled = false;
+      }
+    });
+  }, [scene]);
 
   return (
     <mesh>
-      <hemisphereLight intensity={0.15} groundColor='black' />
+      <hemisphereLight intensity={0.15} groundColor="black" />
       <spotLight
         position={[-20, 50, 10]}
         angle={0.12}
@@ -19,11 +54,14 @@ const Computers = ({ isMobile }) => {
         shadow-mapSize={1024}
       />
       <pointLight intensity={1} />
+
+      {/* 🔥 MODEL */}
       <primitive
-        object={computer.scene}
+        ref={modelRef}
+        object={scene}
         scale={isMobile ? 0.7 : 0.75}
-        position={isMobile ? [0, -3, -2.2] : [0, -3.25, -1.5]}
-        rotation={[-0.01, -0.2, -0.1]}
+        position={isMobile ? [0, -4.2, -2.2] : [0, -4.6, -1.5]} // 👇 niche shift
+        rotation={[-0.1, 0, -0.05]} // initial tilt
       />
     </mesh>
   );
@@ -33,29 +71,18 @@ const ComputersCanvas = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Add a listener for changes to the screen size
     const mediaQuery = window.matchMedia("(max-width: 500px)");
-
-    // Set the initial value of the `isMobile` state variable
     setIsMobile(mediaQuery.matches);
 
-    // Define a callback function to handle changes to the media query
-    const handleMediaQueryChange = (event) => {
-      setIsMobile(event.matches);
-    };
+    const handleChange = (e) => setIsMobile(e.matches);
+    mediaQuery.addEventListener("change", handleChange);
 
-    // Add the callback function as a listener for changes to the media query
-    mediaQuery.addEventListener("change", handleMediaQueryChange);
-
-    // Remove the listener when the component is unmounted
-    return () => {
-      mediaQuery.removeEventListener("change", handleMediaQueryChange);
-    };
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   return (
     <Canvas
-      frameloop='demand'
+      frameloop="always"
       shadows
       dpr={[1, 2]}
       camera={{ position: [20, 3, 5], fov: 25 }}
@@ -68,9 +95,8 @@ const ComputersCanvas = () => {
           minPolarAngle={Math.PI / 2}
         />
         <Computers isMobile={isMobile} />
+        <Preload all />
       </Suspense>
-
-      <Preload all />
     </Canvas>
   );
 };
