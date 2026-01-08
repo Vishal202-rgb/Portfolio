@@ -128,7 +128,7 @@ function sanitizeGeometry(geometry) {
       fixed = true;
     }
   }
-
+  
   if (fixed) {
     geometry.attributes.position.needsUpdate = true;
     geometry.computeVertexNormals();

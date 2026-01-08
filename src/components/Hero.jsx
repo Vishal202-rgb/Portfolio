@@ -66,14 +66,14 @@ import { ComputersCanvas } from "./canvas";
 
 const Hero = () => {
   return (
-    <section className="relative w-full min-h-screen mx-auto overflow-x-hidden">
+    <section className="relative w-full min-h-screen mx-auto overflow-x-hidden pt-24 sm:pt-32">
 
       {/* HERO TEXT */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className={`relative sm:absolute inset-0 sm:top-[120px] max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5 z-10`}
+        className={`relative max-w-7xl mx-auto ${styles.paddingX} flex flex-row items-start gap-5 z-10`}
       >
         <div className="flex flex-col justify-center items-center mt-5">
           <div className="w-5 h-5 rounded-full bg-[#915EFF]" />
@@ -81,7 +81,7 @@ const Hero = () => {
         </div>
 
         <div>
-          <h1 className="text-[40px] sm:text-[60px] md:text-[80px] font-black text-white">
+          <h1 className="text-[40px] sm:text-[60px] md:text-[80px] font-black text-white leading-tight">
             Hi, I'm <span className="text-[#915EFF]">Vishal</span>
           </h1>
 
@@ -93,8 +93,8 @@ const Hero = () => {
         </div>
       </motion.div>
 
-      {/* 3D CANVAS → DESKTOP ONLY */}
-      <div className="absolute inset-0 z-0 pointer-events-none hidden sm:block">
+      {/* 3D CANVAS */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
         <ComputersCanvas />
       </div>
 

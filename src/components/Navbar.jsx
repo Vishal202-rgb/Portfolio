@@ -142,13 +142,13 @@ const Navbar = () => {
 
   const handleNavClick = (id, title) => {
     setActive(title);
-    setToggle(false);
+    setToggle(false); // ✅ close mobile menu
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <nav
-      className={`${styles.paddingX} w-full overflow-x-hidden flex items-center py-5 fixed top-0 z-20 ${
+      className={`${styles.paddingX} fixed top-0 w-full flex items-center py-5 z-50 ${
         scrolled ? "bg-primary" : "bg-transparent"
       }`}
     >
@@ -179,21 +179,23 @@ const Navbar = () => {
         </ul>
 
         {/* MOBILE MENU */}
-        <div className="sm:hidden flex flex-1 justify-end items-center">
+        <div className="sm:hidden flex justify-end items-center">
           <img
             src={toggle ? close : menu}
             alt="menu"
-            className="w-[28px] h-[28px] cursor-pointer"
+            className="w-[28px] h-[28px] cursor-pointer z-50"
             onClick={() => setToggle(!toggle)}
           />
 
           {toggle && (
-            <div className="p-6 black-gradient absolute top-20 right-0 mx-4 my-2 min-w-[140px] z-10 rounded-xl">
-              <ul className="list-none flex flex-col gap-4">
+            <div className="absolute top-16 right-4 z-50 p-6 black-gradient rounded-xl min-w-[160px]">
+              <ul className="list-none flex flex-col gap-4 items-start">
                 {navLinks.map((nav) => (
                   <li
                     key={nav.id}
-                    className="text-secondary hover:text-white text-[16px]"
+                    className={`${
+                      active === nav.title ? "text-white" : "text-secondary"
+                    } hover:text-white text-[16px] font-medium cursor-pointer`}
                     onClick={() => handleNavClick(nav.id, nav.title)}
                   >
                     {nav.title}
